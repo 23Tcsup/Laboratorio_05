@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat con Socket.IO</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    
+    <script>
+        var socket = io();
+        var imagenUsuarioFile = null; // Variable global para almacenar la imagen de perfil
+
+        function enviarMensaje1() {
+            var mensaje = document.getElementById('mensaje1').value;
+            document.getElementById('mensaje1').value = '';
+            return false;
+        }
+
+        socket.on('chat message 1', function (data) {
+            var listaMensajes = document.getElementById('lista-mensajes');
+            var mensaje = document.createElement('li');
+            var imagenUsuarioURL = data.imagenUsuario ? URL.createObjectURL(data.imagenUsuario) : ''; // Obtener la URL de la imagen cargada
+            var hora = new Date().toLocaleTimeString(); // Obtener la hora actual
+            mensaje.innerHTML = `
+                <div class="chat-message">
+                    <div class="message-sender">${data.nombreUsuario}</div>
+                    <div>${data.mensaje}</div>
+                    <div class="message-time">${hora}</div>
+                </div>
+            `;
+            listaMensajes.appendChild(mensaje);
+        });
+
+        function enviarMensaje2() {
+            var mensaje = document.getElementById('mensaje2').value;
+            socket.emit('chat message 2', mensaje);
+            document.getElementById('mensaje2').value = '';
+            return false;
+        }
+
+        socket.on('chat message 2', function (msg) {
+            var listaMensajes = document.getElementById('lista-mensajes');
+            var mensaje = document.createElement('li');
+            var hora = new Date().toLocaleTimeString(); // Obtener la hora actual
+            mensaje.innerHTML = `
+                <div class="chat-message">
+                    <div class="message-sender">Tú</div>
+                    <div>${msg}</div>
+                    <div class="message-time">${hora}</div>
+                </div>
+            `;
+            listaMensajes.appendChild(mensaje);
+        });
+
+        // Función para manejar la carga de la imagen
+        function handleImageUpload(event) {
+            imagenUsuarioFile = event.target.files[0];
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="user-info">
+            <img src="#" alt="Foto de perfil" class="userimg" id="fotoPerfil">
+            <div>
+                <p id="nombreUsuario" class="fw-bold">Nombre de usuario</p>
+                <p class="user-status">En línea</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chat-body">
+        <ul id="lista-mensajes" class="chat-messages"></ul>
+        <form onsubmit="return enviarMensaje2()" class="message-input">
+            <input id="mensaje2" autocomplete="off" placeholder="Escribir mensaje..." type="text">
+            <button>Enviar</button>
+        </form>
+    </div>
+    
+    <div class="2input">
+        <form onsubmit="return enviarMensaje1()" class="first-chat">
+            <h2>Usuario 1</h2>
+            <input id="nombreUsuario" placeholder="Nombre de usuario" />
+            <input type="file" id="imagenUsuario" accept="image/*" onchange="handleImageUpload(event)" /> <!-- Input para cargar la imagen -->
+            <input  autocomplete="off" id="mensaje1" placeholder="Escribir mensaje..." />
+            <button>Enviar</button>
+        </form>
+    </div>
+</body>
+</html>

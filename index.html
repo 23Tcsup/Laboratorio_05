@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat con Socket.IO</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <script>
+        var socket = io();
+        var imagenUsuarioFile = null; // Variable global para almacenar la imagen de perfil
+
+        function enviarMensaje1() {
+            var mensaje = document.getElementById('mensaje1').value;
+            var nombreUsuario = document.getElementById('nombreUsuario').value;
+            var imagenUsuario = imagenUsuarioFile; // Obtener la imagen cargada
+            socket.emit('chat message 1', { mensaje: mensaje, nombreUsuario: nombreUsuario, imagenUsuario: imagenUsuario });
+            document.getElementById('mensaje1').value = '';
+            return false;
+        }
+
+        socket.on('chat message 1', function (data) {
+            let headerChat = document.getElementById('header-chat');
+            var listaMensajes = document.getElementById('lista-mensajes');
+            var mensaje = document.createElement('li');
+            var imagenUsuarioURL = imagenUsuarioFile ? URL.createObjectURL(imagenUsuarioFile) : ''; // Obtener la URL de la imagen cargada
+            headerChat.innerHTML = `<div class="user-info">
+                <img class=" userimg" src="${imagenUsuarioURL}" alt="Foto de perfil">
+                <div class="imgText">
+                    <h4 class="fw-bold">${data.nombreUsuario}<br /><span>En línea</span></h4>
+                </div>
+                <ul class="nav_icons">
+                        <li><ion-icon name="search-outline"></ion-icon></li>
+                        <li><ion-icon name="ellipsis-vertical"></ion-icon></li>
+                      </ul> 
+            </div>
+            `;
+            var hora = new Date().toLocaleTimeString() //hora actual
+            mensaje.innerHTML = `      
+                <div class="mensaje-externo">
+                    <div class="mensaje mensaje-externo-body">${data.mensaje}</div>
+                    <div class="mensaje-hora">${new Date().toLocaleTimeString()}</div>
+                </div>
+            `;
+            mensaje.classList.add("mensaje-chat1");
+            listaMensajes.appendChild(mensaje);
+        });
+
+        function enviarMensaje2() {
+            var mensaje = document.getElementById('mensaje2').value;
+            socket.emit('chat message 2', mensaje);
+            document.getElementById('mensaje2').value = '';
+            return false;
+        }
+
+        socket.on('chat message 2', function (msg) {
+            var listaMensajes = document.getElementById('lista-mensajes');
+            var mensaje = document.createElement('li');
+            mensaje.innerHTML = `
+                <div class="mensaje-propio">
+                    <div class="mensaje mensaje-propio-body">${msg}</div>
+                    <div class="mensaje-hora">${new Date().toLocaleTimeString()}</div>
+                </div>
+            `;
+            mensaje.classList.add("mensaje-chat2");
+            listaMensajes.appendChild(mensaje);
+        });
+
+        // Función para manejar la carga de la imagen
+        function handleImageUpload(event) {
+            imagenUsuarioFile = event.target.files[0];
+        }
+    </script>
+
+</head>
+
+<body>
+    <div>
+        <div class="user-panel">
+            <form onsubmit="return enviarMensaje1()" class="first-chat">
+                <h2>Usuario 1</h2>
+                <input id="nombreUsuario" placeholder="Nombre de usuario" style="color: aliceblue;"/>
+                <input type="file" id="imagenUsuario" accept="image/*" onchange="handleImageUpload(event)" />
+                <!-- Input para cargar la imagen -->
+                <input autocomplete="off" id="mensaje1" placeholder="Escribir mensaje..." />
+                <button>Enviar</button>
+            </form>
+        </div>
+
+        <section class="body-chat">
+            <header class="contentq" style="background-color: rgb(40, 206, 112); padding: 15px; ">
+                <div id="header-chat">         
+                </div>
+            </header>
+            <div class="cuerpo">
+                <div class="cuerp2">
+                    <ul style="left: 0; right: 0;" id="lista-mensajes"></ul>
+                    <form onsubmit="return enviarMensaje2()" class="second-chat">
+                        <input id="mensaje2" autocomplete="off" placeholder="..." />
+                        <button class="btn-send-message" style="margin-right: 20rem;">
+                            Enviar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+</body>
+
+</html>
